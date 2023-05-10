@@ -15,19 +15,32 @@ const buscarCategorias = async (termino = '', res = response) => {
     const esMongoID = ObjectId.isValid(termino);
 
     if (esMongoID) {
-        const categoria = await Categoria.findById(termino).populate('usuario', 'nombre');
+        const query = { _id: termino, estado: true };
+
+        const [total, categoria] = await Promise.all([
+            Categoria.countDocuments(query),
+            Categoria.findById(termino)
+                .populate('usuario', 'nombre')
+        ]);
 
         return res.json({
+            total,
             results: categoria ? [categoria] : []
         });
     }
 
     const regex = new RegExp(termino, 'i');
 
-    const categoria = await Categoria.find({ nombre: regex, estado: true }).populate('usuario', 'nombre');;
+    const query = { nombre: regex, estado: true };
+
+    const [total, categorias] = await Promise.all([
+        Categoria.countDocuments(query),
+        Categoria.find(query).populate('usuario', 'nombre')
+    ]);
 
     res.json({
-        results: categoria
+        total,
+        results: categorias
     });
 }
 
@@ -35,50 +48,70 @@ const buscarProductos = async (termino = '', res = response) => {
     const esMongoID = ObjectId.isValid(termino);
 
     if (esMongoID) {
-        const producto = await Producto
-            .findById(termino)
-            .populate('usuario', 'nombre')
-            .populate('categoria', 'nombre');
+        const query = { _id: termino, estado: true };
+
+        const [total, producto] = await Promise.all([
+            Producto.countDocuments(query),
+            Producto.findById(termino)
+                .populate('usuario', 'nombre')
+                .populate('categoria', 'nombre')
+        ]);
 
         return res.json({
+            total,
             results: producto ? [producto] : []
         });
     }
 
     if (termino.toLocaleLowerCase() === 'disponible') {
-        const producto = await Producto
-            .find({ disponible: true })
-            .populate('usuario', 'nombre')
-            .populate('categoria', 'nombre');
+        const query = { disponible: true, estado: true };
+
+        const [total, productos] = await Promise.all([
+            Producto.countDocuments(query),
+            Producto.find(query)
+                .populate('usuario', 'nombre')
+                .populate('categoria', 'nombre')
+        ]);
 
         return res.json({
-            results: producto
+            total,
+            results: productos
         });
     }
 
     if (termino.toLocaleLowerCase().trim() === 'no-disponible') {
-        const producto = await Producto
-            .find({ disponible: false })
-            .populate('usuario', 'nombre')
-            .populate('categoria', 'nombre');
+        const query = { disponible: false, estado: true };
+
+        const [total, productos] = await Promise.all([
+            Producto.countDocuments(query),
+            Producto.find(query)
+                .populate('usuario', 'nombre')
+                .populate('categoria', 'nombre')
+        ]);
 
         return res.json({
-            results: producto
+            total,
+            results: productos
         });
     }
 
     const regex = new RegExp(termino, 'i');
 
-    const producto = await Producto
-        .find({
-            $or: [{ nombre: regex }, { descripcion: regex }],
-            $and: [{ estado: true }]
-        })
-        .populate('usuario', 'nombre')
-        .populate('categoria', 'nombre');
+    const query = {
+        $or: [{ nombre: regex }, { descripcion: regex }],
+        $and: [{ estado: true }]
+    };
+
+    const [total, productos] = await Promise.all([
+        Producto.countDocuments(query),
+        Producto.find(query)
+            .populate('usuario', 'nombre')
+            .populate('categoria', 'nombre')
+    ]);
 
     res.json({
-        results: producto
+        total,
+        results: productos
     });
 }
 
@@ -86,12 +119,17 @@ const buscarProductosPorCategoria = async (termino = '', res = response) => {
     const esMongoID = ObjectId.isValid(termino);
 
     if (esMongoID) {
-        const producto = await Producto
-            .find({ categoria: termino, estado: true })
-            .populate('usuario', 'nombre')
-            .populate('categoria', 'nombre');
+        const query = { categoria: termino, estado: true };
+
+        const [total, producto] = await Promise.all([
+            Producto.countDocuments(query),
+            Producto.find(query)
+                .populate('usuario', 'nombre')
+                .populate('categoria', 'nombre')
+        ]);
 
         return res.json({
+            total,
             results: producto ? [producto] : []
         });
     }
@@ -106,15 +144,20 @@ const buscarProductosPorCategoria = async (termino = '', res = response) => {
         });
     }
 
-    const producto = await Producto
-        .find({
-            $or: [{ categoria: categoria[0]._id }],
-            $and: [{ estado: true }]
-        })
-        .populate('usuario', 'nombre')
-        .populate('categoria', 'nombre');
+    const query = {
+        $or: [{ categoria: categoria[0]._id }],
+        $and: [{ estado: true }]
+    };
+
+    const [total, producto] = await Promise.all([
+        Producto.countDocuments(query),
+        Producto.find(query)
+            .populate('usuario', 'nombre')
+            .populate('categoria', 'nombre')
+    ]);
 
     res.json({
+        total,
         results: producto
     });
 }
@@ -123,21 +166,32 @@ const buscarUsuarios = async (termino = '', res = response) => {
     const esMongoID = ObjectId.isValid(termino);
 
     if (esMongoID) {
-        const usuario = await Usuario.findById(termino);
+        const query = { _id: termino, estado: true };
+        const [total, usuario] = await Promise.all([
+            Usuario.countDocuments(query),
+            Usuario.findById(query)
+        ]);
 
         return res.json({
+            total,
             results: usuario ? [usuario] : []
         });
     }
 
     const regex = new RegExp(termino, 'i');
 
-    const usuarios = await Usuario.find({
+    const query = {
         $or: [{ nombre: regex }, { correo: regex }],
         $and: [{ estado: true }]
-    });
+    };
+
+    const [total, usuarios] = await Promise.all([
+        Usuario.countDocuments(query),
+        Usuario.find(query)
+    ]);
 
     res.json({
+        total,
         results: usuarios
     });
 }
