@@ -4,8 +4,6 @@ const esAdminRol = (req, res = response, next) => {
 
     const usuario = req.usuario;
 
-    console.log(usuario);
-
     if (!usuario) {
         return res.status(500).json({
             msg: 'Se quiere validar el role sin validar el token'

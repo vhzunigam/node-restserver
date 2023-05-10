@@ -4,6 +4,7 @@ const dbConnection = async () => {
     try {
 
         mongoose.connect(process.env.MONGODB_CNN);
+        mongoose.set('returnOriginal', false);
 
         console.log('Base de datos online');
 
