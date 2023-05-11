@@ -35,6 +35,14 @@ const actualizarImagen = async (req, res = response) => {
             return res.status(400).json({ msg: 'Coleccion no disponible' });
     }
 
+    // Convertir imgen en base64
+    // console.log(req.files.archivo);
+    // const buff = fs.readFileSync(req.files.archivo.tempFilePath);
+    // const    base64data = buff.toString('base64');
+
+    // console.log('Image converted to base 64 is:\n\n' + base64data);
+    //
+
     // Limpiar img previas
     if (modelo.img) {
         const pathImg = path.join(__dirname, '../uploads', coleccion, modelo.img);
@@ -100,7 +108,7 @@ const mostrarImagen = async (req, res = response) => {
             return res.sendFile(pathImg);
         }
     }
-    
+
     const pathImg = path.join(__dirname, '../assets/no-image.jpg');
 
     res.sendFile(pathImg);
